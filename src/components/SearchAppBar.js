@@ -5,8 +5,11 @@ import Toolbar from '@mui/material/Toolbar';
 import Typography from '@mui/material/Typography';
 import InputBase from '@mui/material/InputBase';
 import SearchIcon from '@mui/icons-material/Search';
+import { useState } from 'react';
+import { useDispatch } from 'react-redux';
+import { getGames } from '../store';
 
-const Search = styled('div')(({ theme }) => ({
+const Search = styled('form')(({ theme }) => ({
   position: 'relative',
   borderRadius: theme.shape.borderRadius,
   backgroundColor: alpha(theme.palette.common.white, 0.15),
@@ -41,6 +44,20 @@ const StyledInputBase = styled(InputBase)(({ theme }) => ({
 }));
 
 export default function SearchAppBar() {
+  const [value, setValue] = useState('');
+  const dispatch = useDispatch();
+  
+  const changeHandler = event => {
+    setValue(event.target.value.trim() && event.target.value);
+  }
+  
+  const submitHandler = event => {
+    event.preventDefault();
+    if(!value.trim()) return;
+    dispatch(getGames(value.trim()));
+    setValue('');
+  }
+  
   return (
     <Box sx={{ flexGrow: 1 }}>
       <AppBar position="static">
@@ -53,13 +70,15 @@ export default function SearchAppBar() {
           >
             GAMEFINDER
           </Typography>
-          <Search>
+          <Search onSubmit={submitHandler}>
             <SearchIconWrapper>
               <SearchIcon />
             </SearchIconWrapper>
             <StyledInputBase
               placeholder="Search game…"
-              inputProps={{ 'aria-label': 'search' }}
+              inputProps={{ 'aria-label': 'search'}}
+              onChange={changeHandler}
+              value={value}
             />
           </Search>
         </Toolbar>

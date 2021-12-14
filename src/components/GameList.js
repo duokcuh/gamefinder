@@ -1,43 +1,62 @@
-import { Grid, Typography } from '@mui/material';
+import { Grid, Pagination, Stack, Typography } from '@mui/material';
 import { getGames } from '../store';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { GameItem } from './GameItem';
 import { shallowEqual, useDispatch, useSelector } from 'react-redux';
 
-
 export const GameList = () => {
-  // let { isLoading, games } = useSelector(({ isLoading, games }) => ({ isLoading, games }), shallowEqual);
+  const [page, setPage] = useState(1);
   let isLoading = useSelector(state => state.isLoading, shallowEqual);
   let games = useSelector(state => state.games, shallowEqual);
   let isError = useSelector(state => state.isError, shallowEqual);
+  let query = useSelector(state => state.query, shallowEqual);
   const dispatch = useDispatch();
   
-  useEffect(() => {
-    dispatch(getGames());
-  }, [dispatch]);
+  const pageChange = (event, value) => setPage(value);
+  
+  useEffect(() => {dispatch(getGames())}, [dispatch]);
   
   if (isError) {
     return (
-      <p>Something wrong</p>
+      <Typography variant="h5" component="p" my={2}>
+        Something gone wrong.
+      </Typography>
     )
-  }
-  
-  if (isLoading) {
-    games = [{id:0}, {id:1}, {id:2}]
   }
   
   return (
     <>
       <Typography variant="h4" textAlign="center" my={2}>
-        Top 10 games or Search result
+        {query ? `Search results for "${query}" (total ${games.length})` : 'Top 10 games'}
       </Typography>
-      <Grid container spacing={{ xs: 2, md: 3 }}>
-        {games.map((item, id) => (
-          <Grid item xs={6} sm={4} md={3} key={item.id}>
-            <GameItem {...item} isLoading={isLoading} />
-          </Grid>
-        ))}
-      </Grid>
+      {
+        !isLoading && games.length === 0
+          ?
+          <Typography variant="h5" component="div">
+            Unfortunately no results. Please change request and try again.
+          </Typography>
+          :
+          <Stack spacing={2} alignItems="center">
+            <Grid container spacing={{ xs: 2, md: 3 }}>
+              {(isLoading
+                ? Array.from(new Array(4))
+                : games.slice((page - 1) * 10, page * 10)).map((item, index) => (
+                <Grid item xs={6} sm={4} md={3} key={item?.id || index}>
+                  <GameItem {...item} isLoading={isLoading} />
+                </Grid>
+              ))}
+            </Grid>
+            {
+              games.length > 10 &&
+              <Pagination
+                count={Math.ceil(games.length / 10)}
+                color="primary"
+                page={page}
+                onChange={pageChange}
+              />
+            }
+          </Stack>
+      }
     </>
   );
 };
