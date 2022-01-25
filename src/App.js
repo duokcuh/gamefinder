@@ -1,10 +1,10 @@
 import { BrowserRouter, Route, Routes } from 'react-router-dom';
 import SearchAppBar from './components/SearchAppBar';
-import { Game } from './components/Game';
+import { GameInfo } from './components/GameInfo';
 import { Container } from '@mui/material';
 import { GameList } from './components/GameList';
 import { Provider } from 'react-redux';
-import { store } from './store';
+import { store } from './store/store';
 
 
 function App() {
@@ -15,7 +15,7 @@ function App() {
         <Container>
           <Routes>
             <Route path="/" element={<GameList />} />
-            <Route path="game/:id" element={<Game />} />
+            <Route path="game/:id" element={<GameInfo />} />
           </Routes>
         </Container>
       </Provider>

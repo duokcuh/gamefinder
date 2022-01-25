@@ -1,5 +1,5 @@
 import { Grid, Pagination, Stack, Typography } from '@mui/material';
-import { getGames } from '../store';
+import { getGames } from '../store/asyncActions';
 import { useEffect, useState } from 'react';
 import { GameItem } from './GameItem';
 import { shallowEqual, useDispatch, useSelector } from 'react-redux';
@@ -19,7 +19,7 @@ export const GameList = () => {
   if (isError) {
     return (
       <Typography variant="h5" component="p" my={2}>
-        Something gone wrong.
+        Something gone wrong
       </Typography>
     )
   }
@@ -27,7 +27,7 @@ export const GameList = () => {
   return (
     <>
       <Typography variant="h4" textAlign="center" my={2}>
-        {query ? `Search results for "${query}" (total ${games.length})` : 'Top 10 games'}
+        {query ? `Search results for "${query}" (total ${games.length})` : 'Top rated games'}
       </Typography>
       {
         !isLoading && games.length === 0
@@ -40,16 +40,16 @@ export const GameList = () => {
             <Grid container spacing={{ xs: 2, md: 3 }}>
               {(isLoading
                 ? Array.from(new Array(4))
-                : games.slice((page - 1) * 10, page * 10)).map((item, index) => (
+                : games.slice((page - 1) * 12, page * 12)).map((item, index) => (
                 <Grid item xs={6} sm={4} md={3} key={item?.id || index}>
                   <GameItem {...item} isLoading={isLoading} />
                 </Grid>
               ))}
             </Grid>
             {
-              games.length > 10 &&
+              games.length > 12 &&
               <Pagination
-                count={Math.ceil(games.length / 10)}
+                count={Math.ceil(games.length / 12)}
                 color="primary"
                 page={page}
                 onChange={pageChange}

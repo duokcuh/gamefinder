@@ -7,7 +7,7 @@ import InputBase from '@mui/material/InputBase';
 import SearchIcon from '@mui/icons-material/Search';
 import { useState } from 'react';
 import { useDispatch } from 'react-redux';
-import { getGames } from '../store';
+import { getGames } from '../store/asyncActions';
 
 const Search = styled('form')(({ theme }) => ({
   position: 'relative',
