@@ -3,7 +3,7 @@ import { useEffect } from 'react';
 import { getGameInfo } from '../store/asyncActions';
 import { shallowEqual, useDispatch, useSelector } from 'react-redux';
 import { useParams } from 'react-router-dom';
-import Moment from 'react-moment';
+import Spinner from './Spinner';
 
 export const GameInfo = () => {
   const isLoading = useSelector(state => state.isLoading, shallowEqual);
@@ -26,14 +26,18 @@ export const GameInfo = () => {
   
   return (
     <>
-      {!isLoading && fields.length !== 0 &&
+      {isLoading ? <Spinner /> :
         <>
           <Typography variant="h4" textAlign="center" my={2}>
             {name}
           </Typography>
           <Grid container spacing={2}>
             <Grid item sm={12} md={4}>
-              <img width="100%" alt={`${name} cover`} src={`https://images.igdb.com/igdb/image/upload/t_720p/${images.cover.image_id}.jpg`} />
+              <img
+                width="100%"
+                alt={`${name} cover`}
+                src={`https://images.igdb.com/igdb/image/upload/t_720p/${images.cover.image_id}.jpg`}
+              />
             </Grid>
             <Grid item sm={12} md={8}>
               <List disablePadding={true}>

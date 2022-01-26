@@ -1,4 +1,4 @@
-import { Grid, Pagination, Stack, Typography } from '@mui/material';
+import { Grid, Pagination, Skeleton, Stack, Typography } from '@mui/material';
 import { getGames } from '../store/asyncActions';
 import { useEffect, useState } from 'react';
 import { GameItem } from './GameItem';
@@ -14,7 +14,9 @@ export const GameList = () => {
   
   const pageChange = (event, value) => setPage(value);
   
-  useEffect(() => {dispatch(getGames())}, [dispatch]);
+  useEffect(() => {
+    dispatch(getGames(query))
+  }, [dispatch, query]);
   
   if (isError) {
     return (
@@ -27,7 +29,8 @@ export const GameList = () => {
   return (
     <>
       <Typography variant="h4" textAlign="center" my={2}>
-        {query ? `Search results for "${query}" (total ${games.length})` : 'Top rated games'}
+        {isLoading ? <Skeleton /> :
+          query ? `Search results for "${query}" (total ${games.length})` : 'Top rated games'}
       </Typography>
       {
         !isLoading && games.length === 0

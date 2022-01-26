@@ -6,6 +6,7 @@ import thunk from 'redux-thunk';
 export const LOADING       = 'LOADING',
              GET_GAMES     = 'GET_GAMES',
              GET_GAME_INFO = 'GET_GAME_INFO',
+             SET_QUERY     = 'SET_QUERY',
              ERROR         = 'ERROR';
 
 const initialState = {
@@ -16,22 +17,26 @@ const initialState = {
   query: ''
 }
 
-const reducer = (state = initialState, action) => {
-  switch (action.type) {
+const reducer = (state = initialState, { type, payload }) => {
+  switch (type) {
     case GET_GAMES:
-      const { games, query } = action.payload;
       return {
         ...state,
         isLoading: false,
-        games,
-        query
+        games: payload
       };
     case GET_GAME_INFO:
       return {
         ...state,
         isLoading: false,
-        gameInfo: action.payload
-      }
+        gameInfo: payload
+      };
+    case SET_QUERY:
+      return {
+        ...state,
+        isLoading: true,
+        query: payload
+      };
     case LOADING:
       return {
         ...state,

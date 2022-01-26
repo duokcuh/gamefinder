@@ -1,13 +1,10 @@
 import { styled, alpha } from '@mui/material/styles';
-import AppBar from '@mui/material/AppBar';
-import Box from '@mui/material/Box';
-import Toolbar from '@mui/material/Toolbar';
-import Typography from '@mui/material/Typography';
-import InputBase from '@mui/material/InputBase';
+import { AppBar, Box, Toolbar, Typography, InputBase,  } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 import { useState } from 'react';
 import { useDispatch } from 'react-redux';
-import { getGames } from '../store/asyncActions';
+import { useNavigate } from 'react-router-dom';
+import { SET_QUERY } from '../store/store';
 
 const Search = styled('form')(({ theme }) => ({
   position: 'relative',
@@ -46,6 +43,7 @@ const StyledInputBase = styled(InputBase)(({ theme }) => ({
 export default function SearchAppBar() {
   const [value, setValue] = useState('');
   const dispatch = useDispatch();
+  const navigate = useNavigate();
   
   const changeHandler = event => {
     setValue(event.target.value.trim() && event.target.value);
@@ -54,8 +52,9 @@ export default function SearchAppBar() {
   const submitHandler = event => {
     event.preventDefault();
     if(!value.trim()) return;
-    dispatch(getGames(value.trim()));
+    dispatch({ type: SET_QUERY, payload: value.trim()});
     setValue('');
+    navigate('/');
   }
   
   return (

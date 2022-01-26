@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { ERROR, GET_GAME_INFO, GET_GAMES, LOADING } from './store';
+import { ERROR, GET_GAME_INFO, GET_GAMES } from './store';
 import { getToken } from './getToken';
 import moment from 'moment';
 
@@ -34,7 +34,7 @@ const fetchGames = async (token, query) => {
       })
     );
     
-    return ({ type: GET_GAMES, payload: { games, query } })
+    return ({ type: GET_GAMES, payload: games })
   } catch (err) { throw err }
 }
 
@@ -57,26 +57,9 @@ const fetchGameInfo = async (token, query) => {
   } catch (err) { throw err }
 }
 
-//getGamesInfo result handler
+
+//format fetchGamesInfo result
 const formatResult = result => {
-  console.log('result start: ', { ...result });
-  
-  const { name, artworks, cover, screenshots } = result;
-  
-  //all images
-  const images = { artworks, cover, screenshots };
-  
-  //PEGI age rating
-  if (result.age_ratings) {
-    let { synopsis, rating } = result.age_ratings.find(item => item.category === 2) || {};
-    if (rating === 1) rating = '3+';
-    else if (rating === 2) rating = '7+';
-    else if (rating === 3) rating = '12+';
-    else if (rating === 4) rating = '16+';
-    else if (rating === 5) rating = '18+';
-    else rating = 'Unknown format';
-    result.age_ratings = { synopsis, rating }
-  }
   
   if (result.collection) {
     result.collection = [...result.collection.games]
@@ -88,21 +71,6 @@ const formatResult = result => {
       .find(item => item.developer === true);
     result.involved_companies = [company];
   }
-  
-  //supported multiplayer modes for different platforms
-  if (result.multiplayer_modes) {
-    let multiplayer_modes = {};
-    result.multiplayer_modes.forEach(item => {
-      let modes = [];
-      for (let key in item) {
-        if (item[key] === true) modes.push(key)
-      }
-      modes && (multiplayer_modes = { ...multiplayer_modes, [item.platform.name]: modes })
-    });
-    result.multiplayer_modes = multiplayer_modes;
-  }
-  
-  console.log('result end: ', result);
   
   const fields = [];
   [
@@ -127,41 +95,62 @@ const formatResult = result => {
     let key = Object.keys(label)[0];
     if (result[key]) {
       let data = { label: label[key] };
-      if (Array.isArray(result[key])) {
+      //PEGI age rating
+      if (key === 'age_ratings') {
+        let { synopsis, rating } = result[key].find(item => item.category === 2) || {};
+        if (rating === 1) rating = '3+';
+        else if (rating === 2) rating = '7+';
+        else if (rating === 3) rating = '12+';
+        else if (rating === 4) rating = '16+';
+        else if (rating === 5) rating = '18+';
+        else rating = 'Unknown format';
+        data.value = rating;
+        data.payload = synopsis;
+      }
+      //supported multiplayer modes for different platforms
+      else if (key === 'multiplayer_modes') {
+        let modesPC = [];
+        let nonPC = new Set();
+        result[key].forEach(item => {
+          for (let mode in item) {
+            if (item[mode] === true)
+              item.platform.name === 'PC (Microsoft Windows)' ? modesPC.push(mode) : nonPC.add(mode);
+          }
+        });
+        if (modesPC.length) data.value = `PC: ${modesPC.join(', ')}`;
+        if (nonPC.size) data.payload = `Non PC: ${[...nonPC]}`;
+      } else if (Array.isArray(result[key])) {
         data.value = result[key].map(item => item.name).join(', ');
-      } else if (key === 'age_ratings') {
-        data.value = result[key].rating;
-        data.payload = result[key].synopsis;
       } else if (key === 'aggregated_rating' || key === 'rating') {
         data.value = Math.round(result[key]);
         data.payload = result[key + '_count'];
       } else if (key === 'first_release_date') {
         data.value = moment.unix(result[key]).format('DD.MM.YYYY');
-      } else if (key === 'multiplayer_modes') {
-        for (let platform in result[key]) {
-          if (platform === 'PC (Microsoft Windows)') data.value = `PC: ${result[key][platform]}`;
-          else data.payload = `Non PC: ${data.payload} + ${result[key][platform]}`;
-        }
       } else {
         data.value = result[key]
       }
       fields.push(data)
     }
   });
-  console.log(fields);
+  
+  const { name, artworks, cover, screenshots } = result;
+  
+  //all images
+  const images = { artworks, cover, screenshots };
+  
   return { name, images, fields }
 }
 
+
 const makeRequest = (fetchFunc, query, retry = true) => async (dispatch) => {
-  dispatch({ type: LOADING });
   
   try {
     const token = await getToken(proxy);
     const action = await fetchFunc(token, query);
     dispatch(action);
   } catch (err) {
-    // console.log(err.response);
-    if (err.response.status === 401) {
+    if (!err.response) console.log(err);
+    else if (err.response.status === 401) {
       localStorage.removeItem('tokenObj');
       if (retry) dispatch(makeRequest(fetchFunc, query, false));
       else console.log('getGames request authorization error: ', err.response.data);

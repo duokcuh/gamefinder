@@ -1,8 +1,8 @@
-import { Card, CardActionArea, CardContent, CardMedia, Skeleton } from '@mui/material';
-import Typography from '@mui/material/Typography';
+import { Card, CardActionArea, CardContent, CardMedia, Typography, Skeleton } from '@mui/material';
 import { useEffect, useRef, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { useNavigate } from "react-router-dom";
+import { LOADING } from '../store/store';
 
 export const GameItem = ({ name, image, isLoading = true, id }) => {
   const dispatch = useDispatch();
@@ -14,7 +14,8 @@ export const GameItem = ({ name, image, isLoading = true, id }) => {
   }, [isLoading]);
   
   const clickHandler = () => {
-    navigate(`game/${id}`)
+    navigate(`game/${id}`);
+    dispatch({type: LOADING})
   }
   
   return (
