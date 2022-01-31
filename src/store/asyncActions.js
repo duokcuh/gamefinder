@@ -72,66 +72,71 @@ const formatResult = result => {
     result.involved_companies = [company];
   }
   
-  const fields = [];
-  [
-    { age_ratings: 'Age rating (PEGI)' },
-    { aggregated_rating: 'External rating' },
-    { collection: 'Game collection' },
-    { dlcs: 'DLC' },
-    { expansions: 'Expansions' },
-    { first_release_date: 'Release date' },
-    { game_modes: 'Game modes' },
-    { genres: 'Genres' },
-    { involved_companies: 'Developer' },
-    { multiplayer_modes: 'Multiplayer' },
-    { platforms: 'Platforms' },
-    { player_perspectives: 'Player perspective' },
-    { rating: 'Local rating' },
-    { similar_games: 'Similar games' },
-    { storyline: 'Storyline' },
-    { summary: 'Summary' },
-    { themes: 'Theme' }
-  ].forEach(label => {
-    let key = Object.keys(label)[0];
-    if (result[key]) {
-      let data = { label: label[key] };
+  const fields = [
+    { field: 'genres', label: 'Genre' },
+    { field: 'game_modes', label: 'Game mode' },
+    { field: 'player_perspectives', label: 'Player perspective' },
+    { field: 'themes', label: 'Theme' },
+    { field: 'multiplayer_modes', label: 'Multiplayer' },
+    { field: 'involved_companies', label: 'Developer' },
+    { field: 'first_release_date', label: 'Release date' },
+    { field: 'platforms', label: 'Platform' },
+    { field: 'rating', label: 'Local rating' },
+    { field: 'aggregated_rating', label: 'External critic rating' },
+    { field: 'age_ratings', label: 'Age rating (PEGI)' },
+    { field: 'storyline', label: 'Storyline' },
+    { field: 'summary', label: 'Summary' },
+    { field: 'collection', label: 'Game collection' },
+    { field: 'dlcs', label: 'DLC' },
+    { field: 'expansions', label: 'Expansions' },
+    { field: 'similar_games', label: 'Similar games' }
+  ];
+  fields.forEach(item => {
+    const { field } = item;
+    if (result[field]) {
       //PEGI age rating
-      if (key === 'age_ratings') {
-        let { synopsis, rating } = result[key].find(item => item.category === 2) || {};
+      if (field === 'age_ratings') {
+        let { synopsis, rating } = result[field].find(item => item.category === 2) || {};
         if (rating === 1) rating = '3+';
         else if (rating === 2) rating = '7+';
         else if (rating === 3) rating = '12+';
         else if (rating === 4) rating = '16+';
         else if (rating === 5) rating = '18+';
-        else rating = 'Unknown format';
-        data.value = rating;
-        data.payload = synopsis;
+        else rating = 'Unknown';
+        item.value = rating;
+        item.payload = synopsis;
       }
       //supported multiplayer modes for different platforms
-      else if (key === 'multiplayer_modes') {
+      else if (field === 'multiplayer_modes') {
         let modesPC = [];
         let nonPC = new Set();
-        result[key].forEach(item => {
+        result[field].forEach(item => {
           for (let mode in item) {
             if (item[mode] === true)
               item.platform.name === 'PC (Microsoft Windows)' ? modesPC.push(mode) : nonPC.add(mode);
           }
         });
-        if (modesPC.length) data.value = `PC: ${modesPC.join(', ')}`;
-        if (nonPC.size) data.payload = `Non PC: ${[...nonPC]}`;
-      } else if (Array.isArray(result[key])) {
-        data.value = result[key].map(item => item.name).join(', ');
-      } else if (key === 'aggregated_rating' || key === 'rating') {
-        data.value = Math.round(result[key]);
-        data.payload = result[key + '_count'];
-      } else if (key === 'first_release_date') {
-        data.value = moment.unix(result[key]).format('DD.MM.YYYY');
-      } else {
-        data.value = result[key]
+        if (modesPC.length) item.value = `PC: ${modesPC.join(', ')}`;
+        if (nonPC.size) item.payload = `Non PC: ${[...nonPC].join(', ')}`;
       }
-      fields.push(data)
+      //external and local ratings with number of scores
+      else if (field === 'aggregated_rating' || field === 'rating') {
+        item.value = Math.round(result[field]);
+        item.payload = `(scores: ${ result[field + '_count'] })`;
+      }
+      //release date from unix timestamp
+      else if (field === 'first_release_date') {
+        item.value = moment.unix(result[field]).format('DD.MM.YYYY');
+      }
+      //for result fields like [{name: ... }, ...]
+      else if (Array.isArray(result[field])) {
+        item.value = result[field].map(item => item.name).join(', ');
+      }  else {
+        item.value = result[field]
+      }
     }
   });
+  console.log(fields);
   
   const { name, artworks, cover, screenshots } = result;
   
