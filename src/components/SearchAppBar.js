@@ -1,9 +1,9 @@
 import { styled, alpha } from '@mui/material/styles';
-import { AppBar, Box, Toolbar, Typography, InputBase,  } from '@mui/material';
+import { AppBar, Box, Toolbar, InputBase, Link } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 import { useState } from 'react';
 import { useDispatch } from 'react-redux';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link as RouterLink } from 'react-router-dom';
 import { SET_QUERY } from '../store/store';
 
 const Search = styled('form')(({ theme }) => ({
@@ -11,14 +11,14 @@ const Search = styled('form')(({ theme }) => ({
   borderRadius: theme.shape.borderRadius,
   backgroundColor: alpha(theme.palette.common.white, 0.15),
   '&:hover': {
-    backgroundColor: alpha(theme.palette.common.white, 0.25),
+    backgroundColor: alpha(theme.palette.common.white, 0.25)
   },
   marginLeft: 0,
   width: '100%',
   [theme.breakpoints.up('sm')]: {
     marginLeft: theme.spacing(1),
-    width: 'auto',
-  },
+    width: 'auto'
+  }
 }));
 
 const SearchIconWrapper = styled('div')(({ theme }) => ({
@@ -28,7 +28,7 @@ const SearchIconWrapper = styled('div')(({ theme }) => ({
   pointerEvents: 'none',
   display: 'flex',
   alignItems: 'center',
-  justifyContent: 'center',
+  justifyContent: 'center'
 }));
 
 const StyledInputBase = styled(InputBase)(({ theme }) => ({
@@ -36,8 +36,8 @@ const StyledInputBase = styled(InputBase)(({ theme }) => ({
   '& .MuiInputBase-input': {
     padding: theme.spacing(1, 1, 1, 0),
     paddingLeft: `calc(1em + ${theme.spacing(4)})`,
-    width: '20em',
-  },
+    width: '20em'
+  }
 }));
 
 export default function SearchAppBar() {
@@ -51,31 +51,31 @@ export default function SearchAppBar() {
   
   const submitHandler = event => {
     event.preventDefault();
-    if(!value.trim()) return;
-    dispatch({ type: SET_QUERY, payload: value.trim()});
+    if (!value.trim()) return;
+    dispatch({ type: SET_QUERY, payload: value.trim() });
     setValue('');
     navigate('/');
   }
   
   return (
-    <Box sx={{ flexGrow: 1 }}>
+    <Box>
       <AppBar position="static">
-        <Toolbar>
-          <Typography
+        <Toolbar sx={{ justifyContent: 'space-between' }}>
+          <Link
             variant="h5"
-            noWrap
-            component="div"
-            sx={{ flexGrow: 1, flexShrink: 0, display: { xs: 'none', sm: 'block' } }}
+            component={RouterLink}
+            to="/"
+            sx={{ flexShrink: 0, display: { xs: 'none', sm: 'block' }, textDecoration: 'none', color: 'inherit' }}
           >
             GAMEFINDER
-          </Typography>
+          </Link>
           <Search onSubmit={submitHandler}>
             <SearchIconWrapper>
               <SearchIcon />
             </SearchIconWrapper>
             <StyledInputBase
               placeholder="Search game…"
-              inputProps={{ 'aria-label': 'search'}}
+              inputProps={{ 'aria-label': 'search' }}
               onChange={changeHandler}
               value={value}
             />

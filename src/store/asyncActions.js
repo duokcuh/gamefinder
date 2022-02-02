@@ -67,12 +67,14 @@ const formatResult = result => {
   
   //developer only
   if (result.involved_companies) {
-    let { company } = result.involved_companies.sort((a, b) => a.company.id - b.company.id)
+    let developer = result.involved_companies.sort((a, b) => a.company.id - b.company.id)
       .find(item => item.developer === true);
-    result.involved_companies = [company];
+    result.involved_companies = developer && developer.company.name;
   }
   
-  const fields = [
+  console.log('result: ', result);
+  const fields = [];
+  const fieldsBase = [
     { field: 'genres', label: 'Genre' },
     { field: 'game_modes', label: 'Game mode' },
     { field: 'player_perspectives', label: 'Player perspective' },
@@ -91,9 +93,10 @@ const formatResult = result => {
     { field: 'expansions', label: 'Expansions' },
     { field: 'similar_games', label: 'Similar games' }
   ];
-  fields.forEach(item => {
+  fieldsBase.forEach(item => {
     const { field } = item;
-    if (result[field]) {
+    if (!result[field]) return;
+    try {
       //PEGI age rating
       if (field === 'age_ratings') {
         let { synopsis, rating } = result[field].find(item => item.category === 2) || {};
@@ -122,7 +125,7 @@ const formatResult = result => {
       //external and local ratings with number of scores
       else if (field === 'aggregated_rating' || field === 'rating') {
         item.value = Math.round(result[field]);
-        item.payload = `(scores: ${ result[field + '_count'] })`;
+        item.payload = `(scores: ${result[field + '_count']})`;
       }
       //release date from unix timestamp
       else if (field === 'first_release_date') {
@@ -131,12 +134,15 @@ const formatResult = result => {
       //for result fields like [{name: ... }, ...]
       else if (Array.isArray(result[field])) {
         item.value = result[field].map(item => item.name).join(', ');
-      }  else {
+      } else {
         item.value = result[field]
       }
+      fields.push(item);
+    } catch (err) {
+      console.warn(`Unexpected behavior in the ${field}: `, err);
+      console.log(`${field}: `, result[field]);
     }
   });
-  console.log(fields);
   
   const { name, artworks, cover, screenshots } = result;
   
