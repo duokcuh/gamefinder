@@ -1,25 +1,18 @@
-import { BrowserRouter, Route, Routes } from 'react-router-dom';
-import SearchAppBar from './components/SearchAppBar';
-import { GameInfo } from './components/GameInfo';
+import { Outlet } from 'react-router-dom';
 import { Container } from '@mui/material';
-import { GameList } from './components/GameList';
-import { Provider } from 'react-redux';
+import SearchAppBar from './components/SearchAppBar';
 import { store } from './store/store';
+import { Provider } from 'react-redux';
 
 
 function App() {
   return (
-    <BrowserRouter>
-      <Provider store={store}>
-        <SearchAppBar />
-        <Container>
-          <Routes>
-            <Route path="/" element={<GameList />} />
-            <Route path="game/:id" element={<GameInfo />} />
-          </Routes>
-        </Container>
-      </Provider>
-    </BrowserRouter>
+    <Provider store={store}>
+      <SearchAppBar />
+      <Container>
+        <Outlet />
+      </Container>
+    </Provider>
   );
 }
 

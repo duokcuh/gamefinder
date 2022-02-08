@@ -72,7 +72,6 @@ const formatResult = result => {
     result.involved_companies = developer && developer.company.name;
   }
   
-  console.log('result: ', result);
   const fields = [];
   const fieldsBase = [
     { field: 'genres', label: 'Genre' },
@@ -91,7 +90,7 @@ const formatResult = result => {
     { field: 'collection', label: 'Game collection' },
     { field: 'dlcs', label: 'DLC' },
     { field: 'expansions', label: 'Expansions' },
-    { field: 'similar_games', label: 'Similar games' }
+    { field: 'similar_games', label: 'Similar games', link: true }
   ];
   fieldsBase.forEach(item => {
     const { field } = item;
@@ -106,8 +105,7 @@ const formatResult = result => {
         else if (rating === 4) rating = '16+';
         else if (rating === 5) rating = '18+';
         else rating = 'Unknown';
-        item.value = rating;
-        item.payload = synopsis;
+        item.value = [rating, synopsis].filter(elem => elem).join(' | ');
       }
       //supported multiplayer modes for different platforms
       else if (field === 'multiplayer_modes') {
@@ -119,13 +117,14 @@ const formatResult = result => {
               item.platform.name === 'PC (Microsoft Windows)' ? modesPC.push(mode) : nonPC.add(mode);
           }
         });
-        if (modesPC.length) item.value = `PC: ${modesPC.join(', ')}`;
-        if (nonPC.size) item.payload = `Non PC: ${[...nonPC].join(', ')}`;
+        let modes = [];
+        if (modesPC.length) modes.push(`PC: ${modesPC.join(', ')}`);
+        if (nonPC.size) modes.push(`Non PC: ${[...nonPC].join(', ')}`);
+        item.value = modes.join(' | ');
       }
       //external and local ratings with number of scores
       else if (field === 'aggregated_rating' || field === 'rating') {
-        item.value = Math.round(result[field]);
-        item.payload = `(scores: ${result[field + '_count']})`;
+        item.value = Math.round(result[field]) + ` (scores: ${result[field + '_count']})`;
       }
       //release date from unix timestamp
       else if (field === 'first_release_date') {
@@ -133,7 +132,11 @@ const formatResult = result => {
       }
       //for result fields like [{name: ... }, ...]
       else if (Array.isArray(result[field])) {
-        item.value = result[field].map(item => item.name).join(', ');
+        if (item.link) {
+          item.value = result[field].map(({id, name}) => ({id, name}));
+        } else {
+          item.value = result[field].map(item => item.name).join(', ');
+        }
       } else {
         item.value = result[field]
       }

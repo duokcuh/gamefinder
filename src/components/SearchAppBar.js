@@ -2,9 +2,7 @@ import { styled, alpha } from '@mui/material/styles';
 import { AppBar, Box, Toolbar, InputBase, Link } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 import { useState } from 'react';
-import { useDispatch } from 'react-redux';
 import { useNavigate, Link as RouterLink } from 'react-router-dom';
-import { SET_QUERY } from '../store/store';
 
 const Search = styled('form')(({ theme }) => ({
   position: 'relative',
@@ -42,7 +40,6 @@ const StyledInputBase = styled(InputBase)(({ theme }) => ({
 
 export default function SearchAppBar() {
   const [value, setValue] = useState('');
-  const dispatch = useDispatch();
   const navigate = useNavigate();
   
   const changeHandler = event => {
@@ -52,9 +49,9 @@ export default function SearchAppBar() {
   const submitHandler = event => {
     event.preventDefault();
     if (!value.trim()) return;
-    dispatch({ type: SET_QUERY, payload: value.trim() });
+    let query = value.trim();
     setValue('');
-    navigate('/');
+    navigate(`search?query=${query}`);
   }
   
   return (
@@ -62,10 +59,12 @@ export default function SearchAppBar() {
       <AppBar position="static">
         <Toolbar sx={{ justifyContent: 'space-between' }}>
           <Link
+            underline='none'
+            color='inherit'
             variant="h5"
             component={RouterLink}
             to="/"
-            sx={{ flexShrink: 0, display: { xs: 'none', sm: 'block' }, textDecoration: 'none', color: 'inherit' }}
+            sx={{ flexShrink: 0, display: { xs: 'none', sm: 'block' } }}
           >
             GAMEFINDER
           </Link>

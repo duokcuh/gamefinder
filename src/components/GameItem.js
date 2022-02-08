@@ -14,7 +14,7 @@ export const GameItem = ({ name, image, isLoading = true, id }) => {
   }, [isLoading]);
   
   const clickHandler = () => {
-    navigate(`game/${id}`);
+    navigate(`/game/${id}`);
     dispatch({type: LOADING})
   }
   

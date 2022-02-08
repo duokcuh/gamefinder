@@ -1,18 +1,20 @@
 import { Grid, Pagination, Skeleton, Stack, Typography } from '@mui/material';
 import { getGames } from '../store/asyncActions';
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { GameItem } from './GameItem';
 import { shallowEqual, useDispatch, useSelector } from 'react-redux';
+import { useSearchParams } from 'react-router-dom';
 
 export const GameList = () => {
-  const [page, setPage] = useState(1);
+  let [searchParams, setSearchParams] = useSearchParams();
+  let page = Number(searchParams.get('page')) || 1;
+  let query = searchParams.get('query');
   let isLoading = useSelector(state => state.isLoading, shallowEqual);
   let games = useSelector(state => state.games, shallowEqual);
   let isError = useSelector(state => state.isError, shallowEqual);
-  let query = useSelector(state => state.query, shallowEqual);
   const dispatch = useDispatch();
   
-  const pageChange = (event, value) => setPage(value);
+  const pageChange = (event, page) => setSearchParams({ query, page });
   
   useEffect(() => {
     dispatch(getGames(query))
