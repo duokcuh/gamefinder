@@ -65,7 +65,7 @@ const formatResult = result => {
     result.collection = [...result.collection.games]
   }
   
-  //developer only
+  //get developer only
   if (result.involved_companies) {
     let developer = result.involved_companies.sort((a, b) => a.company.id - b.company.id)
       .find(item => item.developer === true);
@@ -111,13 +111,18 @@ const formatResult = result => {
       else if (field === 'multiplayer_modes') {
         let modesPC = [];
         let nonPC = new Set();
+        let noPlatform = [];
         result[field].forEach(item => {
           for (let mode in item) {
-            if (item[mode] === true)
-              item.platform.name === 'PC (Microsoft Windows)' ? modesPC.push(mode) : nonPC.add(mode);
+            if (item[mode] === true) {
+              if (!item.platform) noPlatform.push(mode);
+              else if (item.platform.name === 'PC (Microsoft Windows)') modesPC.push(mode);
+              else nonPC.add(mode);
+            }
           }
         });
         let modes = [];
+        if (noPlatform.length) modes.push(`${noPlatform.join(', ')}`);
         if (modesPC.length) modes.push(`PC: ${modesPC.join(', ')}`);
         if (nonPC.size) modes.push(`Non PC: ${[...nonPC].join(', ')}`);
         item.value = modes.join(' | ');
@@ -131,12 +136,8 @@ const formatResult = result => {
         item.value = moment.unix(result[field]).format('DD.MM.YYYY');
       }
       //for result fields like [{name: ... }, ...]
-      else if (Array.isArray(result[field])) {
-        if (item.link) {
-          item.value = result[field].map(({id, name}) => ({id, name}));
-        } else {
-          item.value = result[field].map(item => item.name).join(', ');
-        }
+      else if (!item.link && Array.isArray(result[field])) {
+        item.value = result[field].map(item => item.name).join(', ');
       } else {
         item.value = result[field]
       }

@@ -55,8 +55,8 @@ export default function SearchAppBar() {
   }
   
   return (
-    <Box>
-      <AppBar position="static">
+    <Box >
+      <AppBar position="static" sx={{ backgroundColor: 'grey.900' }}>
         <Toolbar sx={{ justifyContent: 'space-between' }}>
           <Link
             underline='none'

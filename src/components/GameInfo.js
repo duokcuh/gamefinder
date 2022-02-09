@@ -1,10 +1,12 @@
-import { Box, Grid, Link, List, ListItem, ListItemButton, ListItemText, Typography } from '@mui/material';
+import { Box, Grid, List, ListItem, ListItemText, Typography } from '@mui/material';
 import { useEffect } from 'react';
-import { getGameInfo } from '../store/asyncActions';
 import { shallowEqual, useDispatch, useSelector } from 'react-redux';
-import { Link as RouterLink, useParams } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
+
+import { getGameInfo } from '../store/asyncActions';
 import Spinner from './Spinner';
 import { LOADING } from '../store/store';
+import { LinksList } from './LinksList';
 
 export const GameInfo = () => {
   const isLoading = useSelector(state => state.isLoading, shallowEqual);
@@ -53,25 +55,9 @@ export const GameInfo = () => {
                         <ListItemText>
                           <strong>{field.label}: </strong>
                           {
-                            !field.link ? field.value :
-                              <List disablePadding={true} sx={{ display: 'inline' }}>
-                                {
-                                  field.value.map(item => {
-                                    return (
-                                      <ListItem disablePadding={true} sx={{ display: 'inline', mx: '2px' }}>
-                                        <ListItemButton
-                                          key={item.id}
-                                          component={RouterLink}
-                                          to={`/game/${item.id}`}
-                                          disableGutters={true}
-                                          sx={{ display: 'inline', color: '#1976d2' }}>
-                                          {item.name}
-                                        </ListItemButton>
-                                      </ListItem>
-                                    )
-                                  })
-                                }
-                              </List>
+                            !field.link
+                              ? field.value
+                              : <LinksList links={field.value} />
                           }
                         </ListItemText>
                       </ListItem>
